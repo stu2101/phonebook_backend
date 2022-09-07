@@ -30,13 +30,12 @@ app.get("/api/persons", (request, response) => {
 })
 
 app.get("/info", (request, response) => {
-    
-    const length = Person.length + 1;
-
-    response.send(`
-        <p>Phonebook has info for ${length} ${length > 1 ? "people" : "person"}<p> 
-        ${new Date()}
-    `);
+    Person.count({}, (err, count) => {
+        response.send(`
+            <p>Phonebook has info for ${count} ${count > 1 ? "people" : "person"}<p> 
+            ${new Date()}
+        `);
+    })
 })
 
 app.get("/api/persons/:id", (request, response) => {
@@ -45,31 +44,17 @@ app.get("/api/persons/:id", (request, response) => {
     })
 })
 
-app.delete("/api/persons/:id", (request, response) => {
-    const id = Number(request.params.id);
-    persons = persons.filter(person => person.id !== id);
-    response.status(204).end();
+app.delete("/api/persons/:id", (request, response, next) => {
+    Person.findByIdAndRemove(request.params.id)
+        .then(result => {
+            response.status(204).end();
+        })
+        .catch(error => {
+            next(error)
+        })
 })
 
 app.post("/api/persons", (request, response) => {
-//     if (!request.body.number || !request.body.name) {
-//         return response.status(400).json({
-//             error: "content missing"
-//         });
-//     }
-// 
-//     if (persons.find(person => person.name === request.body.name) !== undefined) {
-//         return response.status(400).json({
-//             error: "name must be unique"
-//         });
-//     }
-// 
-//     const newPerson = { id: Math.round(Math.random() * (10000000 - persons.length) + persons.length), ...request.body }
-//     persons = persons.concat(newPerson);
-//     console.log(persons);
-// 
-//     response.json(newPerson);
-
     const body = request.body;
 
     if (!body.number || !body.name) {
@@ -87,6 +72,31 @@ app.post("/api/persons", (request, response) => {
         response.json(person);
     })
 })
+
+app.put("/api/persons/:id", (request, response, next) => {
+    const body = request.body;
+
+    const person = {
+        name: body.name,
+        number: body.number
+    }
+
+    Person.findByIdAndUpdate(request.params.id, person, { new: true })
+        .then(newPerson => {
+            response.json(newPerson);
+        })
+        .catch(error => {
+            next(error);
+        })
+})
+
+const errorHandler = (error, request, response, next) => {
+    console.log(error.message);
+
+    next(error);
+}
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
