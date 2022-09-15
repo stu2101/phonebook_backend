@@ -6,7 +6,7 @@ const Person = require("./models/person");
 
 const app = express();
 
-app.use(express.static('build'))
+app.use(express.static("build"));
 app.use(express.json());
 app.use(cors());
 
@@ -16,18 +16,18 @@ app.use(morgan((tokens, req, res) => {
         tokens.method(req, res),
         tokens.url(req, res),
         tokens.status(req, res),
-        tokens.res(req, res, 'content-length'), '-',
-        tokens['response-time'](req, res), 'ms',
+        tokens.res(req, res, "content-length"), "-",
+        tokens["response-time"](req, res), "ms",
         Object.keys(req.body).length ? JSON.stringify(req.body) : []
-    ].join(' ')
-}))
+    ].join(" ");
+}));
 
 app.get("/api/persons", (request, response) => {
     Person.find({}).then(persons => {
         response.json(persons);
     });
 
-})
+});
 
 app.get("/info", (request, response) => {
     Person.count({}, (err, count) => {
@@ -35,14 +35,16 @@ app.get("/info", (request, response) => {
             <p>Phonebook has info for ${count} ${count > 1 ? "people" : "person"}<p> 
             ${new Date()}
         `);
-    })
-})
+    });
+});
 
 app.get("/api/persons/:id", (request, response) => {
     Person.findById(request.params.id).then(person => {
         response.json(person);
-    })
-})
+    });
+});
+
+
 
 app.delete("/api/persons/:id", (request, response, next) => {
     Person.findByIdAndRemove(request.params.id)
@@ -50,17 +52,17 @@ app.delete("/api/persons/:id", (request, response, next) => {
             response.status(204).end();
         })
         .catch(error => {
-            next(error)
-        })
-})
+            next(error);
+        });
+});
 
 app.post("/api/persons", (request, response, next) => {
     const body = request.body;
     const name = body.name;
-    
-    Person.findOne({ name: new RegExp('^' + name + '$', "i") }, (err, person) => {
+
+    Person.findOne({ name: new RegExp("^" + name + "$", "i") }, (err, person) => {
         if (person != null) {
-            response.status(409).send({error: "Name already exists in database"});
+            response.status(409).send({ error: "Name already exists in database" });
         }
     });
 
@@ -73,7 +75,7 @@ app.post("/api/persons", (request, response, next) => {
     const newPerson = Person({
         name: body.name,
         number: body.number
-    })
+    });
 
     newPerson.save()
         .then(person => {
@@ -81,8 +83,8 @@ app.post("/api/persons", (request, response, next) => {
         })
         .catch(error => {
             next(error);
-        })
-})
+        });
+});
 
 app.put("/api/persons/:id", (request, response, next) => {
     const { name, number } = request.body;
@@ -98,24 +100,24 @@ app.put("/api/persons/:id", (request, response, next) => {
         })
         .catch(error => {
             next(error);
-        })
-})
+        });
+});
 
 const errorHandler = (error, request, response, next) => {
-    console.error(error.message)
+    console.error(error.message);
 
-    if (error.name === 'CastError') {
-        return response.status(400).send({ error: 'malformatted id' })
-    } else if (error.name === 'ValidationError') {
-        return response.status(400).json({ error: error.message })
+    if (error.name === "CastError") {
+        return response.status(400).send({ error: "malformatted id" });
+    } else if (error.name === "ValidationError") {
+        return response.status(400).json({ error: error.message });
     }
 
-    next(error)
-}
+    next(error);
+};
 
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log("server running on port", PORT);
-})
+});
