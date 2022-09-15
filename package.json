@@ -7,7 +7,8 @@
         "test": "echo \"Error: no test specified\" && exit 1",
         "dev": "nodemon index.js",
         "start": "node index.js",
-        "build:ui": "rmdir /q /s build && cd ../fullStackOpen/part2/phonebook && npm run build && xcopy /e /i build ..\\..\\..\\phonebook_backend\\build" 
+        "build:ui": "rmdir /q /s build && cd ../fullStackOpen/part2/phonebook && npm run build && xcopy /e /i build ..\\..\\..\\phonebook_backend\\build && cd ..\\..\\..\\phonebook_backend && npm run dev", 
+        "nbuild:ui": "cd ../fullStackOpen/part2/phonebook && npm run build && xcopy /e /i build ..\\..\\..\\phonebook_backend\\build && cd ..\\..\\..\\phonebook_backend && npm run dev" 
     },
     "author": "",
     "license": "ISC",
